@@ -7,7 +7,6 @@ const map = L.map("map", {
 }).setView([46.3, 7.6], 9);
 
 
-
 // Ajouter le fond de carte (OpenStreetMap)
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   attribution: '&copy; OpenStreetMap contributors',
@@ -42,8 +41,19 @@ async function loadCities() {
   }
 }
 
+
+let currentCommune = "";
+
 // Fonction qui affiche les thèmes et contenus pour une ville
 async function showCityInfo(ville) {
+
+  currentCommune = ville.name.toLowerCase(); // <== stocker le nom de la commune
+  cityNameEl.textContent = ville.name;
+  themesListEl.innerHTML = "";
+
+  const res = await fetch(`${API_BASE}/themes/${ville.id}`);
+  const themes = await res.json();
+
   try {
     cityNameEl.textContent = ville.name;
     themesListEl.innerHTML = "";
@@ -106,10 +116,10 @@ document.getElementById("chat-send-btn").addEventListener("click", async () => {
   input.value = "";
 
   try {
-    const res = await fetch(`${API_BASE}/chat`, {
+    const res = await fetch(`${API_BASE}/query`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message }),
+      body: JSON.stringify({ message, commune: currentCommune }),
     });
 
     const data = await res.json();
