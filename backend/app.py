@@ -3,6 +3,8 @@ from flask import Flask, jsonify, request, session
 from flask_cors import CORS
 import mysql.connector
 import requests
+import pickle, faiss, numpy as np
+from sentence_transformers import SentenceTransformer
 
 app = Flask(__name__)
 CORS(app)
@@ -15,6 +17,28 @@ DB_PORT = int(os.getenv("DB_PORT", 3306))
 DB_NAME = os.getenv("DB_NAME", "valais_db")
 DB_USER = os.getenv("DB_USER", "appuser")
 DB_PASS = os.getenv("DB_PASS", "apppassword")
+
+# ───── Assets RAG (PDFs) ──────────────────────────────────────────
+EMBED_MODEL = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
+
+# Les fichiers ont été créés par ingest_pdfs.py
+INDEX_FILE = "faiss.index"
+STORE_FILE = "faiss_store.pkl"
+
+FAISS_INDEX = faiss.read_index(INDEX_FILE)
+with open(STORE_FILE, "rb") as f:
+    _store = pickle.load(f)
+
+CHUNKS = _store["chunks"]          # liste de str
+METAS  = _store["metas"]           # liste de dicts (-> nom du PDF)
+
+def retrieve_chunks(query: str, k: int = 4):
+    """Retourne les k passages les + proches du query."""
+    q_emb = EMBED_MODEL.encode([query]).astype("float32")
+    _, I  = FAISS_INDEX.search(q_emb, k)
+    return [CHUNKS[i] for i in I[0]]
+
+
 
 def get_db_connection():
     return mysql.connector.connect(
@@ -248,23 +272,60 @@ def login():
 
 chat_history = []
 
-@app.route("/api/chat", methods=["POST"])
-def chat_with_gemma():
-    user_input = request.json.get("message")
+@app.route("/api/query", methods=["POST"])
+def query_rag():
+    try:
+        user_input = request.json.get("message", "")
+        passages = retrieve_chunks(user_input, k=4)
+        if not passages:
+            return jsonify({"response": "Je n’ai rien trouvé dans les documents."})
 
-    chat_history.append({"role": "user", "content": user_input})
-    response = requests.post(
-        "http://host.docker.internal:11434/api/chat",
-        json={
+        context = "\n\n".join(passages)
+
+        system_prompt = (
+            "Tu es un assistant juridique valaisan. "
+            "Réponds UNIQUEMENT avec les informations fournies. "
+            "Si tu ne sais pas, dis « Je ne sais pas ».\n\n"
+            f"CONTEXTE :\n{context}"
+        )
+
+        payload = {
             "model": "gemma3:12b",
-            "messages": chat_history,
+            "messages": [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_input}
+            ],
             "stream": False
         }
-    )
 
-    reply = response.json()["message"]["content"]
-    chat_history.append({"role": "assistant", "content": reply})
-    return jsonify({"response": reply})
+        ollama_url = "http://host.docker.internal:11434/api/chat"
+        resp = requests.post(ollama_url, json=payload)
+        resp.raise_for_status()
+        answer = resp.json()["message"]["content"]
+        return jsonify({"response": answer})
+
+    except Exception as e:
+        print("💥 ERREUR DANS /api/query :", e)
+        return jsonify({"response": "Erreur interne avec le chatbot."}), 500
+
+
+# @app.route("/api/chat", methods=["POST"])
+# def chat_with_gemma():
+#     user_input = request.json.get("message")
+
+#     chat_history.append({"role": "user", "content": user_input})
+#     response = requests.post(
+#         "http://host.docker.internal:11434/api/chat",
+#         json={
+#             "model": "gemma3:12b",
+#             "messages": chat_history,
+#             "stream": False
+#         }
+#     )
+
+#     reply = response.json()["message"]["content"]
+#     chat_history.append({"role": "assistant", "content": reply})
+#     return jsonify({"response": reply})
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
