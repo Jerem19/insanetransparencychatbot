@@ -27,10 +27,15 @@ CREATE TABLE IF NOT EXISTS city_themes (
 CREATE TABLE IF NOT EXISTS contents (
   id INT AUTO_INCREMENT PRIMARY KEY,
   theme_id INT NOT NULL,
-  title VARCHAR(150) NOT NULL,
-  url VARCHAR(255) NOT NULL,
-  FOREIGN KEY (theme_id) REFERENCES themes(id) ON DELETE CASCADE ON UPDATE CASCADE
+  city_id  INT NOT NULL,
+  title    VARCHAR(150) NOT NULL,
+  url      VARCHAR(255) NOT NULL,
+  FOREIGN KEY (theme_id) REFERENCES themes(id)
+    ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (city_id)  REFERENCES cities(id)
+    ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 
 INSERT INTO cities (name, latitude, longitude) VALUES
   ('Sion', 46.230677, 7.358767),
@@ -50,6 +55,6 @@ INSERT INTO city_themes (city_id, theme_id) VALUES
   (2, 1),
   (3, 2);
 
-INSERT INTO contents (theme_id, title, url) VALUES
-  (1, 'Guide Touristique Valais PDF', 'https://example.com/valais-tourisme.pdf'),
-  (2, 'Programme Culturel Sion PDF', 'https://example.com/sion-culture.pdf');
+INSERT INTO contents (theme_id, city_id, title, url) VALUES
+  (1, 1, 'Guide Touristique Valais PDF', 'https://example.com/valais-tourisme.pdf'),
+  (2, 1, 'Programme Culturel Sion PDF',    'https://example.com/sion-culture.pdf');
