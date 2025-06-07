@@ -88,3 +88,75 @@ nav {
 #close-info:hover {
   background: #005bb5;
 }
+
+/* === Styles pour page Admin Login === */
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: calc(100vh - 60px); /* conserve l'espace pour l'en-tête si nécessaire */
+  background: #f5f5f5;
+  margin-top: 60px; /* si votre h1 fait 60px + nav, ajustez ou enlevez */
+}
+
+.login-card {
+  background: #ffffff;
+  padding: 24px 32px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  width: 320px;
+  box-sizing: border-box;
+}
+
+.login-card h1 {
+  margin: 0 0 24px;
+  font-size: 1.5rem;
+  text-align: center;
+  color: #333;
+}
+
+.login-card label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #444;
+}
+
+.login-card input {
+  width: 100%;
+  padding: 10px 12px;
+  margin-bottom: 16px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+
+.login-card button[type="submit"] {
+  width: 100%;
+  padding: 12px;
+  background: #0066cc;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.login-card button[type="submit"]:hover {
+  background: #0055a3;
+}
+
+/* Optionnel : lien retour à l’accueil */
+.login-back {
+  display: block;
+  text-align: center;
+  margin-top: 16px;
+  font-size: 0.9rem;
+  color: #0066cc;
+  text-decoration: none;
+}
+.login-back:hover {
+  text-decoration: underline;
+}

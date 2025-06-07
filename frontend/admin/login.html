@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Connexion Admin</title>
+  <!-- Charge le CSS principal (contenant les styles du login) -->
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+  <!-- (Vous pouvez conserver votre <h1> ou utiliser un nav commun) -->
+  <h1 style="text-align:center; margin-top:16px;">Connexion Admin</h1>
+
+  <div class="login-container">
+    <div class="login-card">
+      <h1>Se connecter</h1>
+      <form id="login-form">
+        <label for="username">Utilisateur</label>
+        <input type="text" id="username" required placeholder="Votre nom d'utilisateur" />
+
+        <label for="password">Mot de passe</label>
+        <input type="password" id="password" required placeholder="••••••••" />
+
+        <button type="submit">Se connecter</button>
+      </form>
+      <a href="../index.html" class="login-back">← Retour à la carte</a>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById("login-form");
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const username = document.getElementById("username").value;
+      const password = document.getElementById("password").value;
+      try {
+        const res = await fetch("http://localhost:5000/api/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, password }),
+        });
+        const result = await res.json();
+        if (res.ok && result.success) {
+          window.location.href = "dashboard.html";
+        } else {
+          alert(result.message || "Échec de la connexion");
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Erreur réseau, réessayez.");
+      }
+    });
+  </script>
+</body>
+</html>
