@@ -94,3 +94,29 @@ async function showCityInfo(ville) {
 
 // Lancement de l'application
 loadCities();
+
+document.getElementById("chat-send-btn").addEventListener("click", async () => {
+  const input = document.getElementById("chat-input");
+  const messages = document.getElementById("chat-messages");
+  const message = input.value.trim();
+  if (!message) return;
+
+  // Affiche la question de l'utilisateur
+  messages.innerHTML += `<div><strong>Vous :</strong> ${message}</div>`;
+  input.value = "";
+
+  try {
+    const res = await fetch(`${API_BASE}/chat`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message }),
+    });
+
+    const data = await res.json();
+    messages.innerHTML += `<div><strong>Gemma3 :</strong> ${data.response}</div>`;
+    messages.scrollTop = messages.scrollHeight;
+  } catch (err) {
+    messages.innerHTML += `<div style="color:red;">Erreur avec le chatbot</div>`;
+    console.error("Erreur chatbot :", err);
+  }
+});

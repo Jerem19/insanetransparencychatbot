@@ -2,6 +2,7 @@ import os
 from flask import Flask, jsonify, request, session
 from flask_cors import CORS
 import mysql.connector
+import requests
 
 app = Flask(__name__)
 CORS(app)
@@ -244,6 +245,26 @@ def login():
         session['user'] = username
         return jsonify({"success": True})
     return jsonify({"success": False, "message": "Identifiants invalides"}), 401
+
+chat_history = []
+
+@app.route("/api/chat", methods=["POST"])
+def chat_with_gemma():
+    user_input = request.json.get("message")
+
+    chat_history.append({"role": "user", "content": user_input})
+    response = requests.post(
+        "http://host.docker.internal:11434/api/chat",
+        json={
+            "model": "gemma3:12b",
+            "messages": chat_history,
+            "stream": False
+        }
+    )
+
+    reply = response.json()["message"]["content"]
+    chat_history.append({"role": "assistant", "content": reply})
+    return jsonify({"response": reply})
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
