@@ -31,32 +31,47 @@ nav {
   background: #0055a3;
 }
 
+/* Carte Leaflet */
 #map {
   width: 100%;
   height: calc(100vh - 60px);
 }
 
-#info {
+/* 🧱 Panneau latéral */
+#side-panel {
   position: fixed;
-  top: 20%;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 300px;
-  background: rgba(255,255,255,0.95);
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  top: 0;
+  right: 0;
+  width: 400px;
+  height: 100%;
+  background-color: #fff;
+  box-shadow: -2px 0 10px rgba(0, 0, 0, 0.2);
   padding: 16px;
   z-index: 1000;
+  overflow-y: auto;
+  transform: translateX(100%);
+  transition: transform 0.3s ease-in-out;
 }
 
-#info.hidden {
-  display: none;
+#side-panel.visible {
+  transform: translateX(0);
 }
 
-#info h2 {
-  margin-top: 0;
+#side-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
 }
 
+#close-side-panel {
+  background: none;
+  border: none;
+  font-size: 1.2em;
+  cursor: pointer;
+}
+
+/* Liste des thèmes */
 #themes-list {
   list-style: none;
   padding-left: 0;
@@ -75,18 +90,11 @@ nav {
   text-decoration: underline;
 }
 
-#close-info {
-  margin-top: 12px;
-  padding: 6px 12px;
-  background: #0066cc;
-  color: #fff;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-#close-info:hover {
-  background: #005bb5;
+/* Chatbot intégré */
+#chatbot-container {
+  margin-top: 16px;
+  border-top: 1px solid #ccc;
+  padding-top: 12px;
 }
 
 /* === Styles pour page Admin Login === */
