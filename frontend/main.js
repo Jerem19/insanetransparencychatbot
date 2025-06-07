@@ -60,11 +60,16 @@ async function showCityInfo(ville) {
       li.textContent = "Aucun thème disponible.";
       themesListEl.appendChild(li);
     } else {
-      themes.forEach((theme) => {
-        const li = document.createElement("li");
-        const titleSpan = document.createElement("span");
-        titleSpan.textContent = theme.theme_name;
-        li.appendChild(titleSpan);
+     themes.forEach((theme) => {
+  const li = document.createElement("li");
+  // ajoute deux classes : "theme-item" et "theme-<nom>"
+  const key = theme.theme_name.toLowerCase();
+  li.classList.add("theme-item", `theme-${key}`); 
+
+  const titleSpan = document.createElement("span");
+  titleSpan.textContent = theme.theme_name;
+  titleSpan.classList.add("theme-title");
+  li.appendChild(titleSpan);
 
         if (theme.contents.length > 0) {
           const ulCont = document.createElement("ul");
