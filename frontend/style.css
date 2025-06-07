@@ -6,6 +6,61 @@ html, body {
   overflow: hidden; /* empêche les scrollbars */
 }
 
+/* === Admin Header & Navigation === */
+.admin-header {
+  background: #fff;
+  color: #222;
+  padding: 0 32px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+.admin-header nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+  position: static;
+}
+
+.admin-header .nav-links {
+  display: flex;
+  gap: 32px;
+}
+
+.admin-header nav a {
+  color: #222;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 1.05rem;
+  letter-spacing: 0.02em;
+  padding: 8px 0;
+  border-bottom: 2px solid transparent;
+  transition: color 0.2s, border-bottom 0.2s;
+}
+
+.admin-header nav a:hover,
+.admin-header nav a.active {
+  color: #0066cc;
+  border-bottom: 2px solid #0066cc;
+}
+
+#logout-btn {
+  background: #0066cc;
+  color: #fff;
+  border: none;
+  padding: 9px 22px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1rem;
+  box-shadow: 0 2px 8px rgba(0,102,204,0.08);
+  transition: background 0.2s, box-shadow 0.2s;
+  margin-left: 36px;
+}
+
+#logout-btn:hover {
+  background: #0055a3;
+  box-shadow: 0 4px 16px rgba(0,102,204,0.12);
 /* Bouton Admin */
 nav {
   position: absolute;
@@ -14,6 +69,15 @@ nav {
   z-index: 1001;
 }
 
+/* Remove old nav absolute positioning */
+nav {
+  position: static !important;
+  top: unset !important;
+  right: unset !important;
+  z-index: unset !important;
+}
+
+/* Bouton Admin */
 #admin-login-btn {
   background: #0066cc;
   color: #fff;
@@ -156,7 +220,6 @@ nav {
   background: #0055a3;
 }
 
-/* Optionnel : lien retour à l’accueil */
 .login-back {
   display: block;
   text-align: center;
