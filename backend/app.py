@@ -2,7 +2,6 @@ import os
 from flask import Flask, jsonify, request, session
 from flask_cors import CORS
 import mysql.connector
-from admin.crud import admin_crud
 
 app = Flask(__name__)
 CORS(app)
@@ -26,6 +25,164 @@ def get_db_connection():
         charset='utf8mb4'
     )
 
+# --- CRUD for Cities ---
+@app.route("/api/cities", methods=["GET", "POST"])
+def cities():
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    if request.method == "GET":
+        cursor.execute("SELECT * FROM cities ORDER BY name;")
+        rows = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        return jsonify(rows)
+    elif request.method == "POST":
+        data = request.get_json()
+        cursor.execute(
+            "INSERT INTO cities (name, latitude, longitude, email) VALUES (%s, %s, %s, %s)",
+            (data["name"], data["latitude"], data["longitude"], data.get("email", "")),
+        )
+        conn.commit()
+        cursor.close()
+        conn.close()
+        return jsonify({"success": True}), 201
+
+@app.route("/api/cities/<int:city_id>", methods=["PUT", "DELETE"])
+def city_detail(city_id):
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    if request.method == "PUT":
+        data = request.get_json()
+        cursor.execute(
+            "UPDATE cities SET name=%s, latitude=%s, longitude=%s, email=%s WHERE id=%s",
+            (data["name"], data["latitude"], data["longitude"], data.get("email", ""), city_id),
+        )
+        conn.commit()
+        cursor.close()
+        conn.close()
+        return jsonify({"success": True})
+    elif request.method == "DELETE":
+        cursor.execute("DELETE FROM cities WHERE id=%s", (city_id,))
+        conn.commit()
+        cursor.close()
+        conn.close()
+        return jsonify({"success": True})
+
+# --- CRUD for Themes ---
+@app.route("/api/themes", methods=["GET", "POST"])
+def themes():
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    if request.method == "GET":
+        cursor.execute("SELECT * FROM themes ORDER BY name;")
+        rows = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        return jsonify(rows)
+    elif request.method == "POST":
+        data = request.get_json()
+        cursor.execute("INSERT INTO themes (name) VALUES (%s)", (data["name"],))
+        conn.commit()
+        cursor.close()
+        conn.close()
+        return jsonify({"success": True}), 201
+
+@app.route("/api/themes/<int:theme_id>", methods=["PUT", "DELETE"])
+def theme_detail(theme_id):
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    if request.method == "PUT":
+        data = request.get_json()
+        cursor.execute("UPDATE themes SET name=%s WHERE id=%s", (data["name"], theme_id))
+        conn.commit()
+        cursor.close()
+        conn.close()
+        return jsonify({"success": True})
+    elif request.method == "DELETE":
+        cursor.execute("DELETE FROM themes WHERE id=%s", (theme_id,))
+        conn.commit()
+        cursor.close()
+        conn.close()
+        return jsonify({"success": True})
+
+# --- CRUD for City_Themes ---
+@app.route("/api/city_themes", methods=["GET", "POST"])
+def city_themes():
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    if request.method == "GET":
+        cursor.execute("SELECT * FROM city_themes;")
+        rows = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        return jsonify(rows)
+    elif request.method == "POST":
+        data = request.get_json()
+        cursor.execute(
+            "INSERT INTO city_themes (city_id, theme_id) VALUES (%s, %s)",
+            (data["city_id"], data["theme_id"]),
+        )
+        conn.commit()
+        cursor.close()
+        conn.close()
+        return jsonify({"success": True}), 201
+
+@app.route("/api/city_themes/<int:city_id>/<int:theme_id>", methods=["DELETE"])
+def city_theme_detail(city_id, theme_id):
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute(
+        "DELETE FROM city_themes WHERE city_id=%s AND theme_id=%s", (city_id, theme_id)
+    )
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return jsonify({"success": True})
+
+# --- CRUD for Contents ---
+@app.route("/api/contents", methods=["GET", "POST"])
+def contents():
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    if request.method == "GET":
+        cursor.execute("SELECT * FROM contents;")
+        rows = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        return jsonify(rows)
+    elif request.method == "POST":
+        data = request.get_json()
+        cursor.execute(
+            "INSERT INTO contents (theme_id, title, url) VALUES (%s, %s, %s)",
+            (data["theme_id"], data["title"], data["url"]),
+        )
+        conn.commit()
+        cursor.close()
+        conn.close()
+        return jsonify({"success": True}), 201
+
+@app.route("/api/contents/<int:content_id>", methods=["PUT", "DELETE"])
+def content_detail(content_id):
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    if request.method == "PUT":
+        data = request.get_json()
+        cursor.execute(
+            "UPDATE contents SET theme_id=%s, title=%s, url=%s WHERE id=%s",
+            (data["theme_id"], data["title"], data["url"], content_id),
+        )
+        conn.commit()
+        cursor.close()
+        conn.close()
+        return jsonify({"success": True})
+    elif request.method == "DELETE":
+        cursor.execute("DELETE FROM contents WHERE id=%s", (content_id,))
+        conn.commit()
+        cursor.close()
+        conn.close()
+        return jsonify({"success": True})
+
+# --- Existing endpoints for public API ---
 @app.route("/api/cities", methods=["GET"])
 def list_cities():
     conn = get_db_connection()
@@ -87,8 +244,6 @@ def login():
         session['user'] = username
         return jsonify({"success": True})
     return jsonify({"success": False, "message": "Identifiants invalides"}), 401
-
-app.register_blueprint(admin_crud)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
