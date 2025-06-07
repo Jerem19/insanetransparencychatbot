@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Requests</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+    <header class="admin-header">
+        <nav>
+            <div>
+                <a href="dashboard.html">Database</a>
+                <a href="requests.html">Requests</a>
+            </div>
+            <button id="logout-btn">
+                Logout
+            </button>
+        </nav>
+    </header>
+    <script>
+        document.getElementById('logout-btn').onclick = function() {
+            // Ajoutez ici la logique de déconnexion si besoin (ex: suppression du token)
+            window.location.href = "login.html";
+        };
+    </script>
+    <h1>Requests</h1>
+    <p>Bienvenue, vous êtes connecté en tant qu'administrateur.</p>
+    <!-- Ajoutez ici vos widgets, liens CRUD, statistiques, etc. -->
+</body>
+</html>
