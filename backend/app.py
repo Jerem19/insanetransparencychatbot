@@ -3,11 +3,11 @@ from flask import Flask, jsonify, request, session
 from flask_cors import CORS
 import mysql.connector
 import requests
+import pickle, faiss, numpy as np
+from sentence_transformers import SentenceTransformer
 OLLAMA_HOST = os.getenv("OLLAMA_HOST", "ollama")
 OLLAMA_PORT = os.getenv("OLLAMA_PORT", "11434")
 OLLAMA_ENDPOINT = f"http://{OLLAMA_HOST}:{OLLAMA_PORT}/api/chat"
-import pickle, faiss, numpy as np
-from sentence_transformers import SentenceTransformer
 
 app = Flask(__name__)
 CORS(app)
@@ -303,14 +303,6 @@ def login():
 
 chat_history = []
 
-@app.route("/api/chat", methods=["POST"])
-def chat_with_gemma():
-    user_input = request.json.get("message")
-
-    chat_history.append({"role": "user", "content": user_input})
-    response = requests.post(
-        OLLAMA_ENDPOINT,
-        json={
 @app.route("/api/query", methods=["POST"])
 def query_rag():
     try:
@@ -337,8 +329,7 @@ def query_rag():
             "stream": False
         }
 
-        ollama_url = "http://host.docker.internal:11434/api/chat"
-        resp = requests.post(ollama_url, json=payload)
+        resp = requests.post(OLLAMA_ENDPOINT, json=payload)
         resp.raise_for_status()
         answer = resp.json()["message"]["content"]
         return jsonify({"response": answer})
@@ -346,7 +337,6 @@ def query_rag():
     except Exception as e:
         print("💥 ERREUR DANS /api/query :", e)
         return jsonify({"response": "Erreur interne avec le chatbot."}), 500
-
 
 # @app.route("/api/chat", methods=["POST"])
 # def chat_with_gemma():
