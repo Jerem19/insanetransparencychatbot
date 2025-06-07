@@ -35,11 +35,21 @@ with open(STORE_FILE, "rb") as f:
 CHUNKS = _store["chunks"]          # liste de str
 METAS  = _store["metas"]           # liste de dicts (-> nom du PDF)
 
-def retrieve_chunks(query: str, k: int = 4):
-    """Retourne les k passages les + proches du query."""
+
+
+def retrieve_chunks(query: str, k: int = 4, commune: str = None):
+    """Retourne les k passages les plus proches du query, optionnellement filtrés par commune."""
     q_emb = EMBED_MODEL.encode([query]).astype("float32")
-    _, I  = FAISS_INDEX.search(q_emb, k)
-    return [CHUNKS[i] for i in I[0]]
+    _, I = FAISS_INDEX.search(q_emb, 100)  # On cherche large, puis on filtre
+
+    results = []
+    for i in I[0]:
+        if commune is None or METAS[i]["commune"].lower() == commune.lower():
+            results.append(CHUNKS[i])
+            if len(results) == k:
+                break
+
+    return results
 
 
 
@@ -306,10 +316,13 @@ chat_history = []
 @app.route("/api/query", methods=["POST"])
 def query_rag():
     try:
-        user_input = request.json.get("message", "")
-        passages = retrieve_chunks(user_input, k=4)
+        data = request.get_json()
+        user_input = data.get("message", "")
+        commune    = data.get("commune", "").strip().lower()
+
+        passages = retrieve_chunks(user_input, k=4, commune=commune)
         if not passages:
-            return jsonify({"response": "Je n’ai rien trouvé dans les documents."})
+            return jsonify({"response": "Je n’ai rien trouvé dans les documents pour cette commune."})
 
         context = "\n\n".join(passages)
 
