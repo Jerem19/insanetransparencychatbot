@@ -1,9 +1,9 @@
-import os, glob, pickle, faiss
+import os, pickle, faiss
 from pypdf import PdfReader
 from sentence_transformers import SentenceTransformer
 from tqdm import tqdm
 
-# Important : mets bien ./pdfs car tu copies dans ce dossier via Dockerfile
+# Dossier racine contenant les sous-dossiers par commune
 PDF_DIR        = "./pdfs"
 INDEX_FILE     = "faiss.index"
 STORE_FILE     = "faiss_store.pkl"
@@ -23,14 +23,22 @@ def chunk(text, size=CHUNK_SIZE, overlap=CHUNK_OVERLAP):
 
 # 1. Extraction + chunking
 chunks, metas = [], []
-for pdf_path in glob.glob(os.path.join(PDF_DIR, "*.pdf")):
-    txt = pdf_to_text(pdf_path)
-    if not txt.strip():
-        print(f"⚠️ Aucun texte trouvé dans {os.path.basename(pdf_path)}")
-        continue
-    for c in chunk(txt):
-        chunks.append(c)
-        metas.append({"source": os.path.basename(pdf_path)})
+for dirpath, _, files in os.walk(PDF_DIR):
+    commune = os.path.basename(dirpath).lower()
+    for filename in files:
+        if not filename.endswith(".pdf"):
+            continue
+        pdf_path = os.path.join(dirpath, filename)
+        text = pdf_to_text(pdf_path)
+        if not text.strip():
+            print(f"⚠️ Aucun texte trouvé dans {filename}")
+            continue
+        for c in chunk(text):
+            chunks.append(c)
+            metas.append({
+                "source": filename,
+                "commune": commune
+            })
 
 # 2. Embeddings
 print("🔎 Génération des embeddings...")
@@ -44,7 +52,7 @@ index = faiss.IndexFlatL2(dim)
 index.add(emb.astype("float32"))
 faiss.write_index(index, INDEX_FILE)
 
-# 4. Sauvegarde
+# 4. Sauvegarde des chunks + métadonnées
 with open(STORE_FILE, "wb") as f:
     pickle.dump({"chunks": chunks, "metas": metas}, f)
 
