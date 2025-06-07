@@ -46,18 +46,14 @@ let currentCommune = "";
 
 // Fonction qui affiche les thèmes et contenus pour une ville
 async function showCityInfo(ville) {
-
-  currentCommune = ville.name.toLowerCase(); // <== stocker le nom de la commune
+  currentCommune = ville.name.toLowerCase(); // stocker la commune
   cityNameEl.textContent = ville.name;
   themesListEl.innerHTML = "";
 
-  const res = await fetch(`${API_BASE}/themes/${ville.id}`);
-  const themes = await res.json();
+  // ✅ Nettoyer le chat quand on change de ville
+  document.getElementById("chat-messages").innerHTML = "";
 
   try {
-    cityNameEl.textContent = ville.name;
-    themesListEl.innerHTML = "";
-
     const res = await fetch(`${API_BASE}/themes/${ville.id}`);
     const themes = await res.json();
 
@@ -89,11 +85,11 @@ async function showCityInfo(ville) {
           p.textContent = "Pas de contenu.";
           li.appendChild(p);
         }
+
         themesListEl.appendChild(li);
       });
     }
 
-    // 👉 Afficher le panneau latéral et masquer le bouton Admin
     sidePanel.classList.add("visible");
     adminBtn.style.display = "none";
 
