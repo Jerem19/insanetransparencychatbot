@@ -33,9 +33,12 @@ CREATE TABLE IF NOT EXISTS contents (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 INSERT INTO cities (name, latitude, longitude) VALUES
-  ('Sion', 46.2333, 7.3667),
-  ('Sierre', 46.2917, 7.5333),
-  ('Martigny', 46.0990, 7.0728);
+  ('Sion', 46.230677, 7.358767),
+  ('Sierre', 46.291834, 7.532187),
+  ('CransMontana', 46.309533, 7.477425),
+  ('Heremence', 46.180058, 7.405222),
+  ('Bagne', 46.090291, 7.219296),
+  ('Brig', 46.315547, 7.987604);
 
 INSERT INTO themes (name) VALUES
   ('Tourisme'),
