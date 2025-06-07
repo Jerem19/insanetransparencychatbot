@@ -8,8 +8,7 @@ CREATE TABLE IF NOT EXISTS cities (
   id INT AUTO_INCREMENT PRIMARY KEY,
   name VARCHAR(100) NOT NULL,
   latitude DECIMAL(9,6) NOT NULL,
-  longitude DECIMAL(9,6) NOT NULL,
-  email VARCHAR(100) NOT NULL
+  longitude DECIMAL(9,6) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS themes (
@@ -33,36 +32,14 @@ CREATE TABLE IF NOT EXISTS contents (
   FOREIGN KEY (theme_id) REFERENCES themes(id) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE IF NOT EXISTS requests (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  city_id INT NOT NULL,
-  city_themes_id INT NOT NULL,
-  request_date DATETIME DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (city_id) REFERENCES cities(id) ON DELETE CASCADE ON UPDATE CASCADE,
-  FOREIGN KEY (city_themes_id) REFERENCES city_themes(id) ON DELETE CASCADE ON UPDATE CASCADE
-);
-
-CREATE TABLE IF NOT EXISTS users (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  username VARCHAR(50) NOT NULL UNIQUE,
-  password VARCHAR(255) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-INSERT INTO users (username, password) VALUES
-  ('admin', 'scrypt:32768:8:1$k7E37s7odVpQpCaL$97b0704d0b8d521b3c478efec24de723c728d1e819879051c37a461373e640b21aa743b8347dc3b668b02bddd3b28a067cb435b0fa6bf0cfa655d99cb78114f3');
-
 INSERT INTO cities (name, latitude, longitude) VALUES
-  ('Sion', 46.230677, 7.358767),
-  ('Sierre', 46.291834, 7.532187),
-  ('Crans-Montana', 46.309533, 7.477425),
-  ('Hérémence', 46.180058, 7.405222),
-  ('Bagne', 46.090291, 7.219296),
-  ('Brig', 46.315547, 7.987604);
+  ('Sion', 46.2333, 7.3667),
+  ('Sierre', 46.2917, 7.5333),
+  ('Martigny', 46.0990, 7.0728);
 
 INSERT INTO themes (name) VALUES
-  ('Barème impot communal'),
-  ('Construction');
-  ('Gestion des déchets');
+  ('Tourisme'),
+  ('Culture');
 
 INSERT INTO city_themes (city_id, theme_id) VALUES
   (1, 1),
