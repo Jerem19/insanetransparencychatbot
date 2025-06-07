@@ -6,8 +6,6 @@ const map = L.map("map", {
   zoomControl: false   
 }).setView([46.3, 7.6], 9);
 
-
-
 // Ajouter le fond de carte (OpenStreetMap)
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   attribution: '&copy; OpenStreetMap contributors',
@@ -19,6 +17,12 @@ const sidePanel = document.getElementById("side-panel");
 const cityNameEl = document.getElementById("city-name");
 const themesListEl = document.getElementById("themes-list");
 const adminBtn = document.getElementById("admin-login-btn");
+
+// --- Chatbot Loader & Éléments ---
+const loader   = document.getElementById("chat-loader");
+const input    = document.getElementById("chat-input");
+const btn      = document.getElementById("chat-send-btn");
+const messages = document.getElementById("chat-messages");
 
 // Fermeture du panneau latéral
 document.getElementById("close-side-panel").addEventListener("click", () => {
@@ -83,7 +87,7 @@ async function showCityInfo(ville) {
       });
     }
 
-    // 👉 Afficher le panneau latéral et masquer le bouton Admin
+    // Afficher le panneau latéral et masquer le bouton Admin
     sidePanel.classList.add("visible");
     adminBtn.style.display = "none";
 
@@ -95,11 +99,15 @@ async function showCityInfo(ville) {
 // Lancement de l'application
 loadCities();
 
-document.getElementById("chat-send-btn").addEventListener("click", async () => {
-  const input = document.getElementById("chat-input");
-  const messages = document.getElementById("chat-messages");
+// Listener du chatbot avec loader
+btn.addEventListener("click", async () => {
   const message = input.value.trim();
   if (!message) return;
+
+  // 1) afficher loader + désactiver input/button
+  loader.classList.remove("hidden");
+  input.disabled = true;
+  btn.disabled   = true;
 
   // Affiche la question de l'utilisateur
   messages.innerHTML += `<div><strong>Vous :</strong> ${message}</div>`;
@@ -111,12 +119,18 @@ document.getElementById("chat-send-btn").addEventListener("click", async () => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ message }),
     });
-
     const data = await res.json();
+
+    // Affiche la réponse du chatbot
     messages.innerHTML += `<div><strong>Gemma3 :</strong> ${data.response}</div>`;
     messages.scrollTop = messages.scrollHeight;
   } catch (err) {
     messages.innerHTML += `<div style="color:red;">Erreur avec le chatbot</div>`;
     console.error("Erreur chatbot :", err);
+  } finally {
+    // 2) masquer loader + réactiver input/button
+    loader.classList.add("hidden");
+    input.disabled = false;
+    btn.disabled   = false;
   }
 });

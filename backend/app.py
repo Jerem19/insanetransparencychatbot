@@ -3,6 +3,9 @@ from flask import Flask, jsonify, request, session
 from flask_cors import CORS
 import mysql.connector
 import requests
+OLLAMA_HOST = os.getenv("OLLAMA_HOST", "ollama")
+OLLAMA_PORT = os.getenv("OLLAMA_PORT", "11434")
+OLLAMA_ENDPOINT = f"http://{OLLAMA_HOST}:{OLLAMA_PORT}/api/chat"
 
 app = Flask(__name__)
 CORS(app)
@@ -254,7 +257,7 @@ def chat_with_gemma():
 
     chat_history.append({"role": "user", "content": user_input})
     response = requests.post(
-        "http://host.docker.internal:11434/api/chat",
+        OLLAMA_ENDPOINT,
         json={
             "model": "gemma3:12b",
             "messages": chat_history,
