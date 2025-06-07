@@ -1,19 +1,22 @@
-// frontend/main.js
-
+// URL de l'API backend
 const API_BASE = "http://localhost:5000/api";
 
+// Initialisation de la carte Leaflet
 const map = L.map("map").setView([46.3, 7.6], 9);
 
+// Ajouter le fond de carte (OpenStreetMap)
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-  attribution: '&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors',
+  attribution: '&copy; OpenStreetMap contributors',
   maxZoom: 18,
 }).addTo(map);
 
+// Élément du modal d'info
 const infoDiv = document.getElementById("info");
 const cityNameEl = document.getElementById("city-name");
 const themesListEl = document.getElementById("themes-list");
 const closeInfoBtn = document.getElementById("close-info");
 
+// Cacher le modal
 closeInfoBtn.addEventListener("click", () => {
   infoDiv.classList.add("hidden");
 });
