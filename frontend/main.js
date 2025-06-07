@@ -2,7 +2,11 @@
 const API_BASE = "http://localhost:5000/api";
 
 // Initialisation de la carte Leaflet
-const map = L.map("map").setView([46.3, 7.6], 9);
+const map = L.map("map", {
+  zoomControl: false   
+}).setView([46.3, 7.6], 9);
+
+
 
 // Ajouter le fond de carte (OpenStreetMap)
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
