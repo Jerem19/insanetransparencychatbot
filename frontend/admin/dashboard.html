@@ -26,6 +26,69 @@
   </script>
   <h1>Dashboard Admin</h1>
   <p>Bienvenue, vous êtes connecté en tant qu'administrateur.</p>
-  <!-- Ajoutez ici vos widgets, liens CRUD, statistiques, etc. -->
+
+  <div class="crud-section">
+    <label for="table-select">Sélectionnez une table :</label>
+    <select id="table-select">
+      <option value="cities">Cities</option>
+      <option value="themes">Themes</option>
+      <option value="city_themes">City Themes</option>
+      <option value="contents">Contents</option>
+    </select>
+    <button id="create-btn">Ajouter un élément</button>
+  </div>
+
+  <div id="crud-table-container">
+    <!-- Table will be dynamically inserted here -->
+  </div>
+
+  <script>
+  async function fetchTableData(table) {
+    // Use the backend's exposed port for fetch
+    const res = await fetch(`http://localhost:5000/api/${table}`);
+    if (!res.ok) {
+      document.getElementById('crud-table-container').innerHTML = "<p>Erreur lors du chargement des données.</p>";
+      return [];
+    }
+    return await res.json();
+  }
+
+  function renderTable(table, rows) {
+    const container = document.getElementById('crud-table-container');
+    if (!rows || rows.length === 0) {
+      container.innerHTML = "<p>Aucune donnée à afficher.</p>";
+      return;
+    }
+    const headers = Object.keys(rows[0]);
+    let html = "<table><thead><tr>";
+    headers.forEach(h => html += `<th>${h}</th>`);
+    html += "<th>Actions</th></tr></thead><tbody>";
+    rows.forEach(row => {
+      html += "<tr>";
+      headers.forEach(h => html += `<td data-label="${h}">${row[h]}</td>`);
+      html += `<td data-label="Actions">
+        <button class="edit-btn" data-id="${row.id || row.city_id}">Edit</button>
+        <button class="delete-btn" data-id="${row.id || row.city_id}">Delete</button>
+      </td>`;
+      html += "</tr>";
+    });
+    html += "</tbody></table>";
+    container.innerHTML = html;
+  }
+
+  async function updateTable() {
+    const table = document.getElementById('table-select').value;
+    const rows = await fetchTableData(table);
+    renderTable(table, rows);
+  }
+
+  document.getElementById('table-select').addEventListener('change', updateTable);
+  document.getElementById('create-btn').addEventListener('click', function() {
+    alert('Créer un nouvel élément (à implémenter)');
+  });
+
+  // Initial render
+  updateTable();
+  </script>
 </body>
 </html>

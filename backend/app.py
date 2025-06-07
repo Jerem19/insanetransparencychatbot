@@ -2,6 +2,7 @@ import os
 from flask import Flask, jsonify, request, session
 from flask_cors import CORS
 import mysql.connector
+from admin.crud import admin_crud
 
 app = Flask(__name__)
 CORS(app)
@@ -86,6 +87,8 @@ def login():
         session['user'] = username
         return jsonify({"success": True})
     return jsonify({"success": False, "message": "Identifiants invalides"}), 401
+
+app.register_blueprint(admin_crud)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
