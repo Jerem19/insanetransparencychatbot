@@ -10,14 +10,18 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   maxZoom: 18,
 }).addTo(map);
 
-// Sélection des éléments du panneau latéral
+// Sélection des éléments
 const sidePanel = document.getElementById("side-panel");
 const cityNameEl = document.getElementById("city-name");
 const themesListEl = document.getElementById("themes-list");
+const adminBtn = document.getElementById("admin-login-btn");
 
 // Fermeture du panneau latéral
 document.getElementById("close-side-panel").addEventListener("click", () => {
   sidePanel.classList.remove("visible");
+  setTimeout(() => {
+    adminBtn.style.display = "block";
+  }, 300);
 });
 
 // Fonction pour récupérer et afficher les villes
@@ -75,13 +79,14 @@ async function showCityInfo(ville) {
       });
     }
 
-    // 👉 Afficher le panneau latéral
+    // 👉 Afficher le panneau latéral et masquer le bouton Admin
     sidePanel.classList.add("visible");
+    adminBtn.style.display = "none";
 
   } catch (err) {
     console.error("Erreur lors de la récupération des thèmes :", err);
   }
 }
 
-// Lancement de l'appli
+// Lancement de l'application
 loadCities();
