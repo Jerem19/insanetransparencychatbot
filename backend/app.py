@@ -29,6 +29,23 @@ def get_db_connection():
         charset='utf8mb4'
     )
 
+@app.route("/api/public/cities", methods=["GET"])
+def list_cities():
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    query = """
+        SELECT DISTINCT c.id, c.name, c.latitude, c.longitude
+        FROM cities c
+        LEFT JOIN city_themes ct ON ct.city_id = c.id
+        ORDER BY c.name;
+    """
+    cursor.execute(query)
+    villes = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return jsonify(villes)
+
+
 # --- CRUD for Cities ---
 @app.route("/api/cities", methods=["GET", "POST"])
 def cities():
@@ -41,30 +58,57 @@ def cities():
         conn.close()
         return jsonify(rows)
     elif request.method == "POST":
-        data = request.get_json()
-        cursor.execute(
-            "INSERT INTO cities (name, latitude, longitude, email) VALUES (%s, %s, %s, %s)",
-            (data["name"], data["latitude"], data["longitude"], data.get("email", "")),
-        )
-        conn.commit()
-        cursor.close()
-        conn.close()
-        return jsonify({"success": True}), 201
+        try:
+            data = request.get_json()
+            # Validate latitude and longitude
+            try:
+                latitude = float(data["latitude"])
+                longitude = float(data["longitude"])
+            except (ValueError, TypeError, KeyError):
+                cursor.close()
+                conn.close()
+                return jsonify({"success": False, "error": "Latitude and longitude must be valid numbers."}), 400
+
+            name = data.get("name")
+            if not name:
+                cursor.close()
+                conn.close()
+                return jsonify({"success": False, "error": "Name is required."}), 400
+
+            cursor.execute(
+                "INSERT INTO cities (latitude, longitude, name) VALUES (%s, %s, %s)",
+                (latitude, longitude, name),
+            )
+            conn.commit()
+            cursor.close()
+            conn.close()
+            return jsonify({"success": True}), 201
+        except Exception as e:
+            print("Error in POST /api/cities:", e)
+            cursor.close()
+            conn.close()
+            return jsonify({"success": False, "error": str(e)}), 500
 
 @app.route("/api/cities/<int:city_id>", methods=["PUT", "DELETE"])
 def city_detail(city_id):
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
     if request.method == "PUT":
-        data = request.get_json()
-        cursor.execute(
-            "UPDATE cities SET name=%s, latitude=%s, longitude=%s, email=%s WHERE id=%s",
-            (data["name"], data["latitude"], data["longitude"], data.get("email", ""), city_id),
-        )
-        conn.commit()
-        cursor.close()
-        conn.close()
-        return jsonify({"success": True})
+        try:
+            data = request.get_json()
+            cursor.execute(
+                "UPDATE cities SET name=%s, latitude=%s, longitude=%s WHERE id=%s",
+                (data["name"], data["latitude"], data["longitude"], city_id),
+            )
+            conn.commit()
+            cursor.close()
+            conn.close()
+            return jsonify({"success": True})
+        except Exception as e:
+            print("Error in PUT /api/cities:", e)
+            cursor.close()
+            conn.close()
+            return jsonify({"success": False, "error": str(e)}), 500
     elif request.method == "DELETE":
         cursor.execute("DELETE FROM cities WHERE id=%s", (city_id,))
         conn.commit()
@@ -187,22 +231,6 @@ def content_detail(content_id):
         return jsonify({"success": True})
 
 # --- Existing endpoints for public API ---
-@app.route("/api/cities", methods=["GET"])
-def list_cities():
-    conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
-    query = """
-        SELECT DISTINCT c.id, c.name, c.latitude, c.longitude
-        FROM cities c
-        JOIN city_themes ct ON ct.city_id = c.id
-        ORDER BY c.name;
-    """
-    cursor.execute(query)
-    villes = cursor.fetchall()
-    cursor.close()
-    conn.close()
-    return jsonify(villes)
-
 @app.route("/api/themes/<int:city_id>", methods=["GET"])
 def themes_par_ville(city_id):
     conn = get_db_connection()

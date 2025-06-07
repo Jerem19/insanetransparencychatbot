@@ -35,7 +35,7 @@ document.getElementById("close-side-panel").addEventListener("click", () => {
 // Fonction pour récupérer et afficher les villes
 async function loadCities() {
   try {
-    const res = await fetch(`${API_BASE}/cities`);
+    const res = await fetch(`${API_BASE}/public/cities`);
     const cities = await res.json();
     cities.forEach((ville) => {
       const marker = L.marker([ville.latitude, ville.longitude]).addTo(map);

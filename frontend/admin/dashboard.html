@@ -42,9 +42,26 @@
     <!-- Table will be dynamically inserted here -->
   </div>
 
+  <!-- Edit Modal -->
+  <div id="edit-modal">
+    <div class="modal-content">
+      <button type="button" class="close-modal-btn" onclick="document.getElementById('edit-modal').style.display='none'">&times;</button>
+      <h2>Modifier</h2>
+      <form id="edit-form"></form>
+    </div>
+  </div>
+
+  <!-- Add Modal -->
+  <div id="add-modal" style="display:none;">
+    <div class="modal-content">
+      <button type="button" class="close-modal-btn" onclick="document.getElementById('add-modal').style.display='none'">&times;</button>
+      <h2>Ajouter un élément</h2>
+      <form id="add-form"></form>
+    </div>
+  </div>
+
   <script>
   async function fetchTableData(table) {
-    // Use the backend's exposed port for fetch
     const res = await fetch(`http://localhost:5000/api/${table}`);
     if (!res.ok) {
       document.getElementById('crud-table-container').innerHTML = "<p>Erreur lors du chargement des données.</p>";
@@ -67,13 +84,141 @@
       html += "<tr>";
       headers.forEach(h => html += `<td data-label="${h}">${row[h]}</td>`);
       html += `<td data-label="Actions">
-        <button class="edit-btn" data-id="${row.id || row.city_id}">Edit</button>
-        <button class="delete-btn" data-id="${row.id || row.city_id}">Delete</button>
+        <button class="edit-btn" data-id="${row.id || row.city_id || row.content_id || row.theme_id}">Edit</button>
+        <button class="delete-btn" data-id="${row.id || row.city_id || row.content_id || row.theme_id}">Delete</button>
       </td>`;
       html += "</tr>";
     });
     html += "</tbody></table>";
     container.innerHTML = html;
+
+    // Add event listeners for edit buttons
+    document.querySelectorAll('.edit-btn').forEach(btn => {
+      btn.onclick = function() {
+        const id = btn.getAttribute('data-id');
+        const row = rows.find(r => (r.id || r.city_id || r.content_id || r.theme_id) == id);
+        showEditForm(table, row);
+      };
+    });
+
+    // Add event listeners for delete buttons
+    document.querySelectorAll('.delete-btn').forEach(btn => {
+      btn.onclick = async function() {
+        if (!confirm("Voulez-vous vraiment supprimer cet élément ?")) return;
+        const id = btn.getAttribute('data-id');
+        let url;
+        // For city_themes, need both city_id and theme_id
+        if (table === "city_themes") {
+          const row = rows.find(r => (r.city_id && r.theme_id && (r.city_id == id || r.theme_id == id)));
+          if (!row) return alert("Impossible de trouver la ligne à supprimer.");
+          url = `http://localhost:5000/api/city_themes/${row.city_id}/${row.theme_id}`;
+        } else {
+          url = `http://localhost:5000/api/${table}/${id}`;
+        }
+        const res = await fetch(url, { method: "DELETE" });
+        if (res.ok) {
+          updateTable();
+        } else {
+          alert("Erreur lors de la suppression.");
+        }
+      };
+    });
+  }
+
+  function showEditForm(table, row) {
+    const form = document.getElementById('edit-form');
+    form.innerHTML = '';
+    for (const key in row) {
+      if (key === 'id' || key === 'city_id' || key === 'content_id' || key === 'theme_id') {
+        form.innerHTML += `<input type="hidden" name="${key}" value="${row[key]}">`;
+      } else {
+        form.innerHTML += `<label>${key}: <input name="${key}" value="${row[key] ?? ''}"></label><br>`;
+      }
+    }
+    form.innerHTML += `<button type="submit">Enregistrer</button>`;
+    form.onsubmit = async function(e) {
+      e.preventDefault();
+      const data = {};
+      Array.from(form.elements).forEach(el => {
+        if (el.name) data[el.name] = el.value;
+      });
+      let id = row.id || row.city_id || row.content_id || row.theme_id;
+      let url = `http://localhost:5000/api/${table}/${id}`;
+      let method = "PUT";
+      // For city_themes, both city_id and theme_id are needed, but no edit endpoint exists
+      if (table === "city_themes") {
+        document.getElementById('edit-modal').style.display = 'none';
+        alert("Edition non supportée pour city_themes.");
+        return;
+      }
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      });
+      if (res.ok) {
+        document.getElementById('edit-modal').style.display = 'none';
+        updateTable();
+      } else {
+        alert("Erreur lors de la modification.");
+      }
+    };
+    document.getElementById('edit-modal').style.display = 'block';
+  }
+
+  async function fetchTableColumns(table) {
+    // Fetch one row to get the columns (except for city_themes, which is a join table)
+    const res = await fetch(`http://localhost:5000/api/${table}`);
+    if (!res.ok) return [];
+    const rows = await res.json();
+    if (rows.length === 0) {
+      // Fallback: hardcode columns for empty tables
+      if (table === "cities") return ["name", "latitude", "longitude"];
+      if (table === "themes") return ["name"];
+      if (table === "contents") return ["title", "body", "city_id", "theme_id"];
+      if (table === "city_themes") return ["city_id", "theme_id"];
+      return [];
+    }
+    // Remove id fields for creation
+    return Object.keys(rows[0]).filter(k => !["id", "city_id", "theme_id", "content_id"].includes(k));
+  }
+
+  function showAddForm(table) {
+    const form = document.getElementById('add-form');
+    form.innerHTML = '';
+    fetchTableColumns(table).then(columns => {
+      columns.forEach(key => {
+        form.innerHTML += `
+          <div class="modal-field">
+            <label>${key}</label>
+            <input name="${key}" ${key.includes("id") ? 'type="number"' : 'type="text"'} required>
+          </div>
+        `;
+      });
+      form.innerHTML += `<button type="submit">Ajouter</button>`;
+    });
+
+    form.onsubmit = async function(e) {
+      e.preventDefault();
+      const data = {};
+      Array.from(form.elements).forEach(el => {
+        if (el.name) data[el.name] = el.value;
+      });
+      let url = `http://localhost:5000/api/${table}`;
+      let method = "POST";
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      });
+      if (res.ok) {
+        document.getElementById('add-modal').style.display = 'none';
+        updateTable();
+      } else {
+        alert("Erreur lors de l'ajout.");
+      }
+    };
+    document.getElementById('add-modal').style.display = 'block';
   }
 
   async function updateTable() {
@@ -84,10 +229,9 @@
 
   document.getElementById('table-select').addEventListener('change', updateTable);
   document.getElementById('create-btn').addEventListener('click', function() {
-    alert('Créer un nouvel élément (à implémenter)');
+    const table = document.getElementById('table-select').value;
+    showAddForm(table);
   });
-
-  // Initial render
   updateTable();
   </script>
 </body>
