@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Carte du Valais</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"/>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <h1>Carte interactive du Valais</h1>
+  <div id="map"></div>
+
+  <div id="info" class="hidden">
+    <h2 id="city-name"></h2>
+    <ul id="themes-list"></ul>
+    <button id="close-info">Fermer</button>
+  </div>
+
+  <script  src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>

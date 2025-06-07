@@ -1,0 +1,71 @@
+/* frontend/style.css */
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+}
+
+h1 {
+  text-align: center;
+  margin: 16px 0;
+  font-size: 1.8rem;
+}
+
+#map {
+  width: 100%;
+  height: calc(100vh - 60px);
+}
+
+#info {
+  position: fixed;
+  top: 20%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 300px;
+  background: rgba(255,255,255,0.95);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  padding: 16px;
+  z-index: 1000;
+}
+
+#info.hidden {
+  display: none;
+}
+
+#info h2 {
+  margin-top: 0;
+}
+
+#themes-list {
+  list-style: none;
+  padding-left: 0;
+}
+
+#themes-list li {
+  margin-bottom: 8px;
+}
+
+#themes-list a {
+  color: #0066cc;
+  text-decoration: none;
+}
+
+#themes-list a:hover {
+  text-decoration: underline;
+}
+
+#close-info {
+  margin-top: 12px;
+  padding: 6px 12px;
+  background: #0066cc;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+#close-info:hover {
+  background: #005bb5;
+}
