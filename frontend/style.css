@@ -6,7 +6,7 @@ html, body {
   overflow: hidden; /* empêche les scrollbars */
 }
 
-/* Bouton Admin */
+/* Bouton Admin ultra-stylé */
 nav {
   position: absolute;
   top: 10px;
@@ -15,17 +15,52 @@ nav {
 }
 
 #admin-login-btn {
-  background: #0066cc;
+  position: relative;
+  display: inline-block;
+  padding: 0.75em 1.5em;
+  font-size: 1rem;
+  font-weight: 600;
   color: #fff;
+  background: linear-gradient(135deg, #007acc 0%, #00aaff 100%);
   border: none;
-  padding: 8px 12px;
-  border-radius: 4px;
+  border-radius: 999px;             /* forme “pill” */
+  box-shadow: 0 8px 15px rgba(0, 122, 204, 0.3);
   cursor: pointer;
+  overflow: hidden;                 /* pour les effets internes */
+  transition: transform 0.3s ease,
+              box-shadow 0.3s ease;
+}
+
+/* Petit “shine” passant en survol */
+#admin-login-btn::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    45deg,
+    rgba(255,255,255,0.3) 0%,
+    rgba(255,255,255,0) 80%
+  );
+  transform: translateX(-100%) rotate(45deg);
+  transition: transform 0.7s ease;
 }
 
 #admin-login-btn:hover {
-  background: #0055a3;
+  transform: translateY(-2px);
+  box-shadow: 0 12px 20px rgba(0, 122, 204, 0.4);
 }
+#admin-login-btn:hover::after {
+  transform: translateX(200%) rotate(45deg);
+}
+
+#admin-login-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 5px 10px rgba(0, 122, 204, 0.2);
+}
+
 
 /* Carte Leaflet plein écran */
 #map {
