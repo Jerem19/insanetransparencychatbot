@@ -1,4 +1,3 @@
-# backend/Dockerfile
 FROM python:3-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1
@@ -6,17 +5,20 @@ ENV PYTHONUNBUFFERED=1
 
 WORKDIR /app
 
-# Mettre à jour les paquets Debian avant d'installer quoi que ce soit
+# Dépendances système nécessaires à faiss + sentence-transformers
 RUN apt-get update && \
-    apt-get upgrade -y && \
+    apt-get install -y build-essential libglib2.0-0 libsm6 libxrender1 libxext6 && \
     rm -rf /var/lib/apt/lists/*
 
-# Installer vos dépendances Python (sans == dans requirements.txt si vous préférez)
+# Installer les dépendances Python
 COPY requirements.txt .
-RUN pip install --upgrade pip && \
-    pip install -r requirements.txt
+RUN pip install --upgrade pip && pip install -r requirements.txt
 
-COPY app.py .
+# Copier tous les fichiers nécessaires
+COPY . .
+
+# ⚠️ Exécuter l’indexation au build (FAISS index + pickle)
+RUN python ingest_pdfs.py
 
 EXPOSE 5000
 CMD ["python", "app.py"]
